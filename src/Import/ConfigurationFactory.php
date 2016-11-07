@@ -17,6 +17,38 @@ class ConfigurationFactory
         return $config;
     }
 
+    public static function initialize(Configuration $config, array $importers)
+    {
+        $iKeys = $config->importerKeys;
+        $sKeys = $config->segmentKeys;
+
+        foreach ($importers as $importer) {
+            $config->addImporter($importer);
+        }
+        if (empty($iKeys) && empty($sKeys)) {
+            return;
+        }
+
+        foreach ($config->getImporters(true) as $importer) {
+            $importer->disable();
+            $key = $importer->getKey();
+            if (array_key_exists($key, $iKeys) && true === $iKeys[$key]) {
+                $importer->enable();
+            }
+        }
+
+        foreach ($config->getSegments(true) as $segment) {
+            $segment->disable();
+            $key = $segment->getKey();
+            if (array_key_exists($key, $sKeys) && true === $sKeys[$key]) {
+                $segment->enable();
+            }
+        }
+
+        $config->importerKeys = $iKeys;
+        $config->segmentKeys = $sKeys;
+    }
+
     public static function load($filename)
     {
         $config = unserialize(file_get_contents($filename));

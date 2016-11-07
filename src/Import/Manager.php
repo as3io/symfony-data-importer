@@ -52,11 +52,7 @@ class Manager
     public function create()
     {
         $this->configuration = ConfigurationFactory::create($this->contextKey);
-        foreach ($this->importers as $importer) {
-            if ($importer->supports($this->configuration)) {
-                $this->configuration->addImporter($importer);
-            }
-        }
+        ConfigurationFactory::initialize($this->configuration, $this->importers);
         return $this->configuration;
     }
 
@@ -64,19 +60,8 @@ class Manager
     {
         $path = sprintf('%s/%s', $this->storagePath, $filename);
         $this->configuration = ConfigurationFactory::load($path);
-        $this->initializeConfiguration();
+        ConfigurationFactory::initialize($this->configuration, $this->importers);
         return $this->configuration;
-    }
-
-    /**
-     * Translate keys for importers and segments back into the currently loaded services.
-     */
-    private function initializeConfiguration()
-    {
-        foreach ($this->importers as $importer) {
-            $enabled = in_array($importer->getKey(), $this->configuration->getImporterKeys());
-            $this->configuration->addImporter($importer, $enabled);
-        }
     }
 
     public function save()
