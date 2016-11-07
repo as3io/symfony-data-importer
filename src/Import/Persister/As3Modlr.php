@@ -68,7 +68,7 @@ final class As3Modlr extends Persister
      */
     public function getModelTypes()
     {
-        $types = ['location', 'tag-family', 'tag', 'publication', 'publication-issue', 'publication-section', 'publication-section-award'];
+        $types = [];
         return array_unique(array_merge($types, $this->storageEngine->getModelTypes()));
     }
 
@@ -111,29 +111,6 @@ final class As3Modlr extends Persister
         }
 
         if (Configuration::SCHEMA_MODE_NONE !== $mode = $this->configuration->getSchemaMode()) {
-            $indices = [
-                [
-                    'fields'    => ['legacy.id' => 1, 'legacy.source' => 1],
-                    'options'   => ['unique' => true, 'sparse' => true]
-                ],
-                [
-                    'fields'    => ['urlPath' => 1, 'deleted' => 1],
-                    'options'   => []
-                ],
-                [
-                    'fields'    => ['redirects' => 1, 'deleted' => 1],
-                    'options'   => []
-                ],
-                [
-                    'fields'    => ['name' => 'text'],
-                    'options'   => ['textIndexVersion'  => 2]
-                ]
-            ];
-            foreach ($this->storageEngine->getModelTypes() as $type) {
-                foreach ($indices as $index) {
-                    $this->getCollectionForModel($type)->ensureIndex($index['fields'], $index['options']);
-                }
-            }
         }
     }
 
