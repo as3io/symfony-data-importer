@@ -44,7 +44,7 @@ final class Import extends Command
     {
         parent::configure();
         $this
-            ->setName('radix:import')
+            // ->setName('radix:import')
             ->setDescription('Imports customers.')
             ->addOption('assume', null, InputOption::VALUE_NONE, 'Assume yes and start ASAP.')
         ;

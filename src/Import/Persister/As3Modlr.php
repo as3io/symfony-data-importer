@@ -149,9 +149,10 @@ final class As3Modlr extends Persister
         if ($identifier instanceof \MongoId) {
             $identifier = (string) $identifier;
         }
+        $externalKey = isset($kvs['legacy']) ? 'legacy' : 'external';
 
         $model = $this->storageEngine->create($scn, $identifier)->apply($kvs);
-        $legacy = $kvs['legacy'];
+        $externalData = isset($kvs[$externalKey]) ? $kvs[$externalKey] : [];
         $kvs = $this->extractRawModelValues($scn, $model);
         $em = $this->getMetadataFor($scn);
 
@@ -200,7 +201,7 @@ final class As3Modlr extends Persister
             $kvs['_id'] = $oId;
         }
 
-        $kvs['legacy'] = $legacy;
+        $kvs[$externalKey] = $externalData;
 
         return $kvs;
     }

@@ -258,9 +258,13 @@ abstract class Persister implements PersisterInterface
      */
     final protected function doUpsert($scn, array $kvs)
     {
+        $upsertKey = isset($kvs['external']) ? 'external' : 'legacy';
+        $upsertNs  = 'legacy' === $upsertKey ? 'source' : 'namespace';
+        $upsertId  = 'legacy' === $upsertKey ? 'id' : 'identifier';
+
         $update = ['$set' => $kvs];
-        if (!isset($kvs['legacy']['id']) || !isset($kvs['legacy']['source'])) {
-            throw new Exception\UpsertException('Legacy ID or Source was not specified, cannot upsert!');
+        if (!isset($kvs[$upsertKey][$upsertId]) || !isset($kvs[$upsertKey][$upsertNs])) {
+            throw new Exception\UpsertException(sprintf('%s.%s or %s.%s was not specified, cannot upsert!', $upsertKey, $upsertId, $upsertKey, $upsertNs));
         }
 
         if (!isset($kvs['_id'])) {
@@ -271,8 +275,8 @@ abstract class Persister implements PersisterInterface
         }
 
         $query = [
-            'legacy.id' => $kvs['legacy']['id'],
-            'legacy.source' => $kvs['legacy']['source']
+            sprintf('%s.%s', $upsertKey, $upsertId) => $kvs[$upsertKey][$upsertId],
+            sprintf('%s.%s', $upsertKey, $upsertNs) => $kvs[$upsertKey][$upsertNs],
         ];
 
         $r = $this->getCollectionForModel($scn)->update($query, $update, ['upsert' => true]);
